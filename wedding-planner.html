@@ -1,0 +1,1782 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Our Wedding Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent-blue: #3d5afe;
+    --accent-purple: #7c4dff;
+    --accent-violet: #9c5cff;
+    --grad: linear-gradient(125deg, var(--accent-blue), var(--accent-purple));
+    --grad-soft: linear-gradient(125deg, rgba(61,90,254,.12), rgba(124,77,255,.12));
+    --radius: 18px;
+    --radius-sm: 12px;
+    --ease: cubic-bezier(.22,.61,.36,1);
+    --serif: "Fraunces", Georgia, "Times New Roman", serif;
+    --sans: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  html[data-theme="light"] {
+    --bg: #ffffff;
+    --bg-tint: #f7f7fb;
+    --surface: #ffffff;
+    --surface-2: #fbfbfe;
+    --border: #ececf4;
+    --border-strong: #dcdce8;
+    --text: #15151f;
+    --text-soft: #4a4a5c;
+    --text-faint: #8a8a9c;
+    --shadow: 0 1px 2px rgba(20,20,40,.04), 0 8px 28px rgba(40,40,90,.07);
+    --shadow-lg: 0 4px 12px rgba(20,20,40,.06), 0 24px 60px rgba(40,40,90,.12);
+    --sidebar-bg: #fbfbfe;
+    --input-bg: #ffffff;
+    --chip-bg: #f2f2fa;
+  }
+
+  html[data-theme="dark"] {
+    --bg: #0a0a0f;
+    --bg-tint: #101018;
+    --surface: #14141d;
+    --surface-2: #181824;
+    --border: #26263a;
+    --border-strong: #34344e;
+    --text: #f3f3f8;
+    --text-soft: #b6b6cc;
+    --text-faint: #76768e;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 32px rgba(0,0,0,.5);
+    --shadow-lg: 0 4px 14px rgba(0,0,0,.5), 0 28px 70px rgba(0,0,0,.6);
+    --sidebar-bg: #0d0d14;
+    --input-bg: #101018;
+    --chip-bg: #1c1c2b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    transition: background .4s var(--ease), color .4s var(--ease);
+    overflow: hidden;
+  }
+
+  /* subtle ambient background glow */
+  body::before {
+    content: "";
+    position: fixed;
+    top: -20%; right: -10%;
+    width: 50vw; height: 50vw;
+    background: radial-gradient(circle, rgba(124,77,255,.10), transparent 60%);
+    pointer-events: none; z-index: 0;
+  }
+  body::after {
+    content: "";
+    position: fixed;
+    bottom: -25%; left: 8%;
+    width: 45vw; height: 45vw;
+    background: radial-gradient(circle, rgba(61,90,254,.08), transparent 60%);
+    pointer-events: none; z-index: 0;
+  }
+
+  .app { display: flex; height: 100vh; position: relative; z-index: 1; }
+
+  /* ===== SIDEBAR ===== */
+  .sidebar {
+    width: 264px;
+    flex-shrink: 0;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 28px 18px;
+    transition: background .4s var(--ease), border-color .4s var(--ease);
+  }
+  .brand { padding: 4px 12px 26px; }
+  .brand .eyebrow {
+    font-size: 10.5px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--accent-purple); font-weight: 700; margin-bottom: 6px;
+  }
+  .brand h1 {
+    font-family: var(--serif); font-weight: 500; font-size: 27px;
+    line-height: 1.1; letter-spacing: -.01em;
+  }
+  .brand h1 .amp { font-style: italic; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .brand .date-line { font-size: 12.5px; color: var(--text-faint); margin-top: 8px; font-weight: 500; }
+
+  .nav { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 13px;
+    padding: 11px 14px; border-radius: var(--radius-sm);
+    cursor: pointer; color: var(--text-soft); font-weight: 600; font-size: 14px;
+    border: 1px solid transparent;
+    transition: all .2s var(--ease);
+    position: relative;
+  }
+  .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; opacity: .85; }
+  .nav-item:hover { background: var(--chip-bg); color: var(--text); }
+  .nav-item.active {
+    background: var(--surface); color: var(--text);
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow);
+  }
+  .nav-item.active::before {
+    content: ""; position: absolute; left: -18px; top: 50%; transform: translateY(-50%);
+    width: 4px; height: 22px; border-radius: 4px; background: var(--grad);
+  }
+  .nav-item.active svg { opacity: 1; color: var(--accent-purple); }
+  .nav-count {
+    margin-left: auto; font-size: 11px; font-weight: 700;
+    background: var(--chip-bg); color: var(--text-soft);
+    padding: 2px 8px; border-radius: 20px; min-width: 24px; text-align: center;
+  }
+  .nav-item.active .nav-count { background: var(--grad-soft); color: var(--accent-purple); }
+
+  .nav-subgroup { display: flex; flex-direction: column; gap: 2px; margin: 2px 0 4px; position: relative; padding-left: 18px; }
+  .nav-subgroup::before { content: ""; position: absolute; left: 20px; top: 4px; bottom: 6px; width: 1.5px; background: var(--border); }
+  .nav-item.nav-sub { padding: 8px 14px 8px 18px; font-size: 13px; font-weight: 600; color: var(--text-faint); }
+  .nav-item.nav-sub span:first-child { position: relative; }
+  .nav-item.nav-sub:hover { color: var(--text); }
+  .nav-item.nav-sub.active { color: var(--text); background: var(--surface); border-color: var(--border-strong); box-shadow: var(--shadow); }
+  .nav-item.nav-sub.active::before { left: -18px; height: 16px; }
+  .nav-item.nav-sub .nav-count { font-size: 10px; padding: 1px 7px; min-width: 20px; }
+
+  /* progress bar */
+  .progress-wrap { margin: 4px 0 22px; }
+  .progress-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 9px; }
+  .progress-top .pct { font-family: var(--serif); font-size: 26px; font-weight: 500; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .progress-top .lbl { font-size: 13px; color: var(--text-soft); font-weight: 600; }
+  .progress-track { height: 10px; background: var(--chip-bg); border-radius: 20px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--grad); border-radius: 20px; transition: width .5s var(--ease); }
+
+  /* status badges */
+  .badge { display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; padding: 3px 9px; border-radius: 20px; }
+  .badge-possible { background: var(--grad-soft); color: var(--accent-purple); }
+  .badge-yes { background: rgba(46,204,113,.14); color: #1f9d57; }
+  .badge-no { background: rgba(224,80,106,.14); color: #e0506a; }
+  .badge-pending { background: var(--chip-bg); color: var(--text-faint); }
+  html[data-theme="dark"] .badge-yes { color: #4ade80; }
+  .guest-maybe { color: var(--accent-purple); font-weight: 700; font-size: 12px; }
+
+  .toggle-btn {
+    width: 22px; height: 22px; border-radius: 7px; border: 2px solid var(--border-strong);
+    cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: all .2s; background: var(--input-bg);
+  }
+  .toggle-btn svg { width: 13px; height: 13px; color: #fff; opacity: 0; }
+  .toggle-btn.on { background: var(--grad); border-color: transparent; }
+  .toggle-btn.on svg { opacity: 1; }
+  td select.rsvp-select { padding: 6px 10px; font-size: 13px; max-width: 150px; }
+  td input.rsvp-num { padding: 6px 10px; font-size: 13px; max-width: 90px; }
+
+  .possible-row { margin-bottom: 18px; }
+  .possible-toggle {
+    width: 100%; display: flex; align-items: center; gap: 12px; text-align: left;
+    padding: 14px 16px; border-radius: var(--radius-sm); cursor: pointer; font-family: var(--sans);
+    font-size: 13.5px; color: var(--text-soft); background: var(--surface-2);
+    border: 1.5px solid var(--border-strong); transition: all .2s var(--ease);
+  }
+  .possible-toggle .pt-check {
+    width: 22px; height: 22px; border-radius: 7px; flex-shrink: 0; border: 2px solid var(--border-strong);
+    display: flex; align-items: center; justify-content: center; transition: all .2s;
+  }
+  .possible-toggle .pt-check svg { width: 13px; height: 13px; color: #fff; opacity: 0; }
+  .possible-toggle.on { border-color: var(--accent-purple); background: var(--grad-soft); color: var(--text); }
+  .possible-toggle.on .pt-check { background: var(--grad); border-color: transparent; }
+  .possible-toggle.on .pt-check svg { opacity: 1; }
+  .possible-toggle b { color: var(--accent-purple); font-weight: 800; }
+
+  .sidebar-foot { margin-top: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+  .theme-toggle {
+    display: flex; align-items: center; background: var(--chip-bg);
+    border-radius: 30px; padding: 4px; cursor: pointer; border: 1px solid var(--border);
+    position: relative;
+  }
+  .theme-toggle .tt-opt {
+    flex: 1; text-align: center; padding: 7px 0; font-size: 12px; font-weight: 700;
+    color: var(--text-faint); z-index: 2; display: flex; align-items: center; justify-content: center; gap: 6px;
+    transition: color .3s var(--ease);
+  }
+  .theme-toggle .tt-opt svg { width: 14px; height: 14px; }
+  .theme-toggle .tt-opt.on { color: #fff; }
+  .theme-toggle .tt-slider {
+    position: absolute; top: 4px; left: 4px; width: calc(50% - 4px); height: calc(100% - 8px);
+    background: var(--grad); border-radius: 26px; transition: transform .35s var(--ease);
+  }
+  html[data-theme="dark"] .theme-toggle .tt-slider { transform: translateX(100%); }
+
+  .backup-btns { display: flex; gap: 8px; }
+  .mini-btn {
+    flex: 1; font-size: 11.5px; font-weight: 700; padding: 8px; border-radius: 10px;
+    background: var(--surface); border: 1px solid var(--border); color: var(--text-soft);
+    cursor: pointer; transition: all .2s var(--ease);
+  }
+  .mini-btn:hover { color: var(--text); border-color: var(--border-strong); }
+
+  .sync-btn {
+    display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%;
+    padding: 11px; border-radius: var(--radius-sm); border: 1px solid transparent;
+    background: var(--grad-soft); color: var(--accent-purple); font-family: var(--sans);
+    font-weight: 700; font-size: 13px; cursor: pointer; transition: all .2s var(--ease);
+  }
+  .sync-btn:hover { box-shadow: var(--shadow); }
+  .sync-btn svg { width: 16px; height: 16px; }
+  .sync-status { font-size: 11px; font-weight: 600; color: var(--text-faint); text-align: center; margin: -2px 0 2px; }
+  .sync-status.on { color: #1f9d57; }
+  html[data-theme="dark"] .sync-status.on { color: #4ade80; }
+  .sync-status.syncing { color: var(--accent-purple); }
+  .sync-warn {
+    margin-top: 16px; font-size: 12px; line-height: 1.55; color: var(--text-soft);
+    background: rgba(255,179,0,.10); border: 1px solid rgba(255,179,0,.3);
+    border-radius: var(--radius-sm); padding: 12px 14px;
+  }
+
+  /* ===== MAIN ===== */
+  .main { flex: 1; overflow-y: auto; padding: 38px 46px 80px; }
+  .main::-webkit-scrollbar { width: 10px; }
+  .main::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 10px; border: 3px solid var(--bg); }
+
+  .page-head { margin-bottom: 30px; }
+  .page-head .eyebrow {
+    font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--accent-purple); font-weight: 700; margin-bottom: 8px;
+  }
+  .page-head h2 { font-family: var(--serif); font-weight: 500; font-size: 38px; letter-spacing: -.02em; line-height: 1; }
+  .page-head p { color: var(--text-faint); margin-top: 10px; font-size: 14.5px; max-width: 620px; }
+
+  .view { display: none; animation: fade .45s var(--ease); }
+  .view.active { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+  /* ===== TILES ===== */
+  .tile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; }
+  .tile {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 22px; box-shadow: var(--shadow); position: relative; overflow: hidden;
+    transition: transform .28s var(--ease), box-shadow .28s var(--ease), border-color .28s var(--ease);
+  }
+  .tile.clickable { cursor: pointer; }
+  .tile.clickable:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--border-strong); }
+  .tile .tile-glow { position: absolute; top: -40px; right: -40px; width: 110px; height: 110px; background: var(--grad); opacity: .10; border-radius: 50%; filter: blur(8px); }
+  .tile-icon {
+    width: 42px; height: 42px; border-radius: 12px; background: var(--grad-soft);
+    display: flex; align-items: center; justify-content: center; margin-bottom: 16px;
+  }
+  .tile-icon svg { width: 21px; height: 21px; color: var(--accent-purple); }
+  .tile-label { font-size: 12.5px; font-weight: 700; color: var(--text-faint); text-transform: uppercase; letter-spacing: .07em; }
+  .tile-value { font-family: var(--serif); font-size: 42px; font-weight: 500; line-height: 1; margin-top: 6px; letter-spacing: -.02em; }
+  .tile-value.sm { font-size: 25px; }
+  .tile-sub { font-size: 13px; color: var(--text-soft); margin-top: 10px; }
+  .tile-tag {
+    display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 700;
+    padding: 4px 10px; border-radius: 20px; margin-top: 12px;
+  }
+  .tag-ok { background: rgba(46,204,113,.13); color: #1f9d57; }
+  .tag-warn { background: rgba(255,179,0,.16); color: #c98a00; }
+  .tag-todo { background: var(--grad-soft); color: var(--accent-purple); }
+  html[data-theme="dark"] .tag-ok { color: #4ade80; }
+  html[data-theme="dark"] .tag-warn { color: #fbbf24; }
+
+  /* ===== CARDS / PANELS ===== */
+  .panel {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 26px; box-shadow: var(--shadow); margin-bottom: 22px;
+  }
+  .panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 14px; flex-wrap: wrap; }
+  .panel-head h3 { font-family: var(--serif); font-weight: 500; font-size: 23px; letter-spacing: -.01em; }
+  .panel-head .sub { font-size: 13px; color: var(--text-faint); margin-top: 3px; }
+
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 12px; font-weight: 700; color: var(--text-soft); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 7px; }
+  input, select, textarea {
+    width: 100%; font-family: var(--sans); font-size: 14.5px; color: var(--text);
+    background: var(--input-bg); border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+    padding: 11px 14px; transition: border-color .2s, box-shadow .2s;
+  }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent-purple); box-shadow: 0 0 0 3px rgba(124,77,255,.15); }
+  textarea { resize: vertical; min-height: 90px; line-height: 1.55; }
+  .field-row { display: grid; gap: 14px; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  .btn {
+    font-family: var(--sans); font-weight: 700; font-size: 13.5px; padding: 11px 20px;
+    border-radius: var(--radius-sm); border: none; cursor: pointer; color: #fff;
+    background: var(--grad); transition: transform .15s var(--ease), opacity .2s, box-shadow .2s;
+    display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(124,77,255,.3);
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(124,77,255,.42); }
+  .btn:active { transform: none; }
+  .btn svg { width: 16px; height: 16px; }
+  .btn-ghost {
+    background: var(--surface); color: var(--text-soft); border: 1px solid var(--border-strong);
+    box-shadow: none;
+  }
+  .btn-ghost:hover { color: var(--text); box-shadow: none; }
+  .btn-sm { padding: 8px 14px; font-size: 12.5px; }
+  .btn-danger { background: transparent; color: #e0506a; box-shadow: none; border: 1px solid transparent; }
+  .btn-danger:hover { background: rgba(224,80,106,.1); transform: none; box-shadow: none; }
+
+  /* ===== TABLE ===== */
+  .table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; min-width: 760px; }
+  th {
+    text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--text-faint); padding: 13px 16px; background: var(--surface-2); border-bottom: 1px solid var(--border);
+    position: sticky; top: 0;
+  }
+  td { padding: 13px 16px; font-size: 14px; border-bottom: 1px solid var(--border); color: var(--text); }
+  tbody tr { transition: background .15s; }
+  tbody tr:hover { background: var(--bg-tint); }
+  tbody tr:last-child td { border-bottom: none; }
+  .row-actions { display: flex; gap: 6px; justify-content: flex-end; }
+  .icon-btn {
+    width: 32px; height: 32px; border-radius: 9px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text-faint); cursor: pointer; display: inline-flex;
+    align-items: center; justify-content: center; transition: all .2s;
+  }
+  .icon-btn:hover { color: var(--text); border-color: var(--border-strong); }
+  .icon-btn.del:hover { color: #e0506a; border-color: rgba(224,80,106,.4); background: rgba(224,80,106,.08); }
+  .icon-btn svg { width: 15px; height: 15px; }
+
+  .empty { text-align: center; padding: 50px 20px; color: var(--text-faint); }
+  .empty svg { width: 40px; height: 40px; opacity: .4; margin-bottom: 14px; }
+  .empty p { font-size: 14px; }
+
+  /* stat strip */
+  .stat-strip { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 22px; }
+  .stat-pill {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 16px 20px; flex: 1; min-width: 160px; box-shadow: var(--shadow);
+  }
+  .stat-pill .n { font-family: var(--serif); font-size: 30px; font-weight: 500; line-height: 1; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .stat-pill .l { font-size: 12px; color: var(--text-faint); margin-top: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+  .state-breakdown { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+  .state-chip { background: var(--chip-bg); border-radius: 20px; padding: 6px 13px; font-size: 12.5px; font-weight: 600; }
+  .state-chip b { color: var(--accent-purple); font-weight: 800; }
+
+  /* vendor cards */
+  .vendor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .vendor-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px; box-shadow: var(--shadow); border-left: 4px solid var(--border-strong);
+    transition: transform .25s var(--ease), box-shadow .25s;
+  }
+  .vendor-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+  .vendor-card.like { border-left-color: #2ecc71; }
+  .vendor-card.dislike { border-left-color: #e0506a; }
+  .vendor-card.maybe { border-left-color: var(--accent-violet); }
+  .vendor-card .vc-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .vendor-card h4 { font-family: var(--serif); font-weight: 600; font-size: 19px; }
+  .vendor-card .vc-meta { font-size: 12.5px; color: var(--text-faint); margin-top: 4px; }
+  .verdict { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; padding: 4px 10px; border-radius: 20px; white-space: nowrap; }
+  .verdict.like { background: rgba(46,204,113,.14); color: #1f9d57; }
+  .verdict.dislike { background: rgba(224,80,106,.14); color: #e0506a; }
+  .verdict.maybe { background: var(--grad-soft); color: var(--accent-purple); }
+  html[data-theme="dark"] .verdict.like { color: #4ade80; }
+  .vendor-card .vc-notes { font-size: 13.5px; color: var(--text-soft); margin-top: 14px; line-height: 1.55; white-space: pre-wrap; }
+  .vendor-card .vc-actions { display: flex; gap: 6px; margin-top: 16px; }
+  .rating { display: inline-flex; gap: 2px; margin-top: 8px; }
+  .rating .star { color: var(--border-strong); font-size: 15px; }
+  .rating .star.on { color: var(--accent-violet); }
+
+  /* want / dont lists */
+  .pref-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .pref-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+  .pref-list li {
+    display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--radius-sm);
+    background: var(--surface-2); border: 1px solid var(--border); font-size: 14px;
+  }
+  .pref-list li .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .pref-list.want li .dot { background: #2ecc71; }
+  .pref-list.dont li .dot { background: #e0506a; }
+  .pref-list li span { flex: 1; }
+  .pref-list li .x { cursor: pointer; color: var(--text-faint); font-size: 18px; line-height: 1; }
+  .pref-list li .x:hover { color: #e0506a; }
+  .add-inline { display: flex; gap: 8px; margin-top: 14px; }
+  .add-inline input { flex: 1; }
+
+  /* checklist */
+  .checklist { list-style: none; display: flex; flex-direction: column; gap: 7px; margin-top: 6px; }
+  .checklist li { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: var(--radius-sm); background: var(--surface-2); border: 1px solid var(--border); font-size: 14px; }
+  .checklist li.done span { text-decoration: line-through; color: var(--text-faint); }
+  .check {
+    width: 20px; height: 20px; border-radius: 6px; border: 2px solid var(--border-strong);
+    cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .2s;
+  }
+  .check.on { background: var(--grad); border-color: transparent; }
+  .check svg { width: 12px; height: 12px; color: #fff; opacity: 0; }
+  .check.on svg { opacity: 1; }
+  .checklist li span { flex: 1; }
+  .checklist li .x { cursor: pointer; color: var(--text-faint); font-size: 18px; }
+  .checklist li .x:hover { color: #e0506a; }
+
+  /* timeline */
+  .timeline { position: relative; margin-top: 8px; padding-left: 6px; }
+  .timeline::before { content: ""; position: absolute; left: 64px; top: 6px; bottom: 6px; width: 2px; background: var(--border); }
+  .tl-item { display: flex; gap: 18px; align-items: flex-start; margin-bottom: 16px; position: relative; }
+  .tl-time { width: 58px; flex-shrink: 0; text-align: right; font-weight: 700; font-size: 13px; color: var(--accent-purple); padding-top: 2px; }
+  .tl-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--grad); flex-shrink: 0; margin-top: 4px; box-shadow: 0 0 0 4px var(--surface); z-index: 1; }
+  .tl-body { flex: 1; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .tl-body span { font-size: 14px; }
+
+  /* notes */
+  .notes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 18px; }
+  .note-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 22px; box-shadow: var(--shadow); transition: transform .25s var(--ease), box-shadow .25s;
+    display: flex; flex-direction: column;
+  }
+  .note-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+  .note-card h4 { font-family: var(--serif); font-weight: 600; font-size: 20px; margin-bottom: 6px; }
+  .note-card .note-date { font-size: 11.5px; color: var(--text-faint); margin-bottom: 12px; font-weight: 600; }
+  .note-card .note-desc { font-size: 14px; color: var(--text-soft); line-height: 1.6; white-space: pre-wrap; flex: 1; }
+  .note-files { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .note-thumb { width: 64px; height: 64px; border-radius: 10px; object-fit: cover; border: 1px solid var(--border); cursor: pointer; }
+  .note-file-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 8px 12px; background: var(--chip-bg); border-radius: 10px; color: var(--text-soft); text-decoration: none; }
+  .note-file-chip svg { width: 14px; height: 14px; }
+  .note-card .note-actions { display: flex; gap: 6px; margin-top: 16px; }
+
+  /* ===== FILTER BAR ===== */
+  .filter-bar {
+    display: none; flex-wrap: wrap; align-items: flex-end; gap: 12px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 18px 20px; box-shadow: var(--shadow); margin-bottom: 14px;
+  }
+  .filter-bar.open { display: flex; }
+  .filter-field { display: flex; flex-direction: column; gap: 5px; }
+  .filter-field label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text-faint); }
+  .filter-field input, .filter-field select { padding: 8px 11px; font-size: 13px; width: 140px; }
+  .filter-field input[type="number"] { width: 92px; }
+  #clearFilters { align-self: flex-end; }
+  .filter-meta { font-size: 12.5px; color: var(--text-faint); margin-bottom: 14px; font-weight: 600; }
+
+  /* ===== WEDDING PARTY ===== */
+  .party-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .party-side {
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 22px; position: relative; overflow: hidden;
+  }
+  .party-side.bride { border-top: 3px solid var(--accent-purple); }
+  .party-side.groom { border-top: 3px solid var(--accent-blue); }
+  .party-side-head { display: flex; align-items: center; gap: 11px; margin-bottom: 20px; }
+  .party-side-head h3 { font-family: var(--serif); font-weight: 500; font-size: 24px; letter-spacing: -.01em; }
+  .party-side-head .side-dot { width: 11px; height: 11px; border-radius: 50%; }
+  .party-side.bride .side-dot { background: var(--accent-purple); }
+  .party-side.groom .side-dot { background: var(--accent-blue); }
+  .party-side-head .side-n { margin-left: auto; font-size: 12px; font-weight: 700; background: var(--chip-bg); color: var(--text-soft); padding: 3px 11px; border-radius: 20px; }
+  .party-stack { display: flex; flex-direction: column; gap: 13px; }
+
+  .pm-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 15px 18px; display: flex; align-items: center; gap: 14px; box-shadow: var(--shadow);
+    transition: transform .2s var(--ease), box-shadow .2s;
+  }
+  .pm-card:hover { transform: translateX(3px); }
+  .pm-avatar {
+    width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center;
+    justify-content: center; font-family: var(--serif); font-weight: 600; font-size: 17px;
+    background: var(--chip-bg); color: var(--text-soft);
+  }
+  .pm-info { flex: 1; min-width: 0; }
+  .pm-name { font-weight: 700; font-size: 15px; }
+  .pm-role { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text-faint); margin-top: 2px; }
+  .pm-addr { font-size: 12px; color: var(--text-faint); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pm-actions { display: flex; gap: 5px; flex-shrink: 0; }
+
+  /* Tier 1 — Bride / Groom: most highlighted */
+  .pm-card.tier1 {
+    padding: 22px; box-shadow: var(--shadow-lg); border: none; color: #fff;
+  }
+  .pm-card.tier1.bride { background: linear-gradient(130deg, var(--accent-purple), var(--accent-violet)); }
+  .pm-card.tier1.groom { background: linear-gradient(130deg, var(--accent-blue), #5a78ff); }
+  .pm-card.tier1 .pm-avatar { width: 54px; height: 54px; font-size: 22px; background: rgba(255,255,255,.22); color: #fff; }
+  .pm-card.tier1 .pm-name { font-family: var(--serif); font-weight: 600; font-size: 22px; }
+  .pm-card.tier1 .pm-role { color: rgba(255,255,255,.85); }
+  .pm-card.tier1 .pm-addr { color: rgba(255,255,255,.78); }
+  .pm-card.tier1 .icon-btn { background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.3); color: #fff; }
+  .pm-card.tier1 .icon-btn:hover { background: rgba(255,255,255,.3); }
+
+  /* Tier 2 — MOH / Best Man: second most highlighted */
+  .pm-card.tier2 { box-shadow: var(--shadow); }
+  .pm-card.tier2.bride { border: 1.5px solid var(--accent-purple); background: var(--grad-soft); }
+  .pm-card.tier2.groom { border: 1.5px solid var(--accent-blue); background: linear-gradient(125deg, rgba(61,90,254,.10), rgba(90,120,255,.10)); }
+  .pm-card.tier2 .pm-avatar { background: var(--grad); color: #fff; }
+  .pm-card.tier2 .pm-name { font-size: 16.5px; }
+
+  /* ===== MODAL ===== */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(10,10,20,.55); backdrop-filter: blur(4px);
+    display: none; align-items: center; justify-content: center; z-index: 100; padding: 24px;
+    animation: fade .25s var(--ease);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 22px;
+    width: 100%; max-width: 560px; max-height: 88vh; overflow-y: auto; box-shadow: var(--shadow-lg);
+    animation: pop .35s var(--ease);
+  }
+  @keyframes pop { from { opacity: 0; transform: scale(.95) translateY(14px); } to { opacity: 1; transform: none; } }
+  .modal-head { padding: 26px 28px 0; display: flex; justify-content: space-between; align-items: flex-start; }
+  .modal-head h3 { font-family: var(--serif); font-weight: 500; font-size: 25px; letter-spacing: -.01em; }
+  .modal-close { cursor: pointer; color: var(--text-faint); font-size: 26px; line-height: 1; background: none; border: none; }
+  .modal-close:hover { color: var(--text); }
+  .modal-body { padding: 22px 28px 28px; }
+  .modal-foot { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; padding: 0 28px 28px; }
+
+  .filedrop {
+    border: 2px dashed var(--border-strong); border-radius: var(--radius-sm); padding: 22px;
+    text-align: center; cursor: pointer; transition: all .2s; color: var(--text-faint);
+  }
+  .filedrop:hover { border-color: var(--accent-purple); color: var(--accent-purple); background: var(--grad-soft); }
+  .filedrop svg { width: 26px; height: 26px; margin-bottom: 6px; }
+  .filedrop p { font-size: 13px; font-weight: 600; }
+  .filedrop small { font-size: 11px; opacity: .7; }
+  .pending-files { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .pending-files .pf { position: relative; }
+  .pending-files img { width: 56px; height: 56px; border-radius: 8px; object-fit: cover; }
+  .pending-files .pf-doc { font-size: 11px; padding: 8px 10px; background: var(--chip-bg); border-radius: 8px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pending-files .pf .rm { position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; border-radius: 50%; background: #e0506a; color: #fff; font-size: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; }
+
+  /* lightbox */
+  .lightbox { position: fixed; inset: 0; background: rgba(0,0,0,.85); display: none; align-items: center; justify-content: center; z-index: 200; padding: 30px; cursor: zoom-out; }
+  .lightbox.open { display: flex; }
+  .lightbox img { max-width: 92%; max-height: 92%; border-radius: 12px; }
+
+  /* toast */
+  .toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(120px);
+    background: var(--text); color: var(--bg); padding: 13px 24px; border-radius: 30px;
+    font-size: 13.5px; font-weight: 700; z-index: 300; box-shadow: var(--shadow-lg); transition: transform .4s var(--ease);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .add-row { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+  .search-box { flex: 1; min-width: 200px; position: relative; }
+  .search-box svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--text-faint); }
+  .search-box input { padding-left: 40px; }
+
+  .menu-toggle { display: none; }
+
+  @media (max-width: 900px) {
+    body { overflow: auto; }
+    .app { flex-direction: column; height: auto; }
+    .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); padding: 18px; }
+    .nav { display: grid; grid-template-columns: repeat(2,1fr); }
+    .nav-subgroup { grid-column: 1 / -1; padding-left: 8px; }
+    .nav-subgroup::before { display: none; }
+    .nav-item.active::before { display: none; }
+    .main { padding: 26px 20px 60px; height: auto; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .pref-cols { grid-template-columns: 1fr; }
+    .party-cols { grid-template-columns: 1fr; }
+    .filter-field input, .filter-field select { width: 100%; }
+    .filter-field { flex: 1; min-width: 130px; }
+    .page-head h2 { font-size: 30px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="eyebrow">Wedding Planner</div>
+      <h1 id="coupleTitle">Our <span class="amp">&amp;</span> Day</h1>
+      <div class="date-line" id="dateLine">Set your date in the Venue tab</div>
+    </div>
+    <nav class="nav" id="nav">
+      <div class="nav-item active" data-view="overview">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        <span>Overview</span>
+      </div>
+      <div class="nav-item" data-view="invites">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+        <span>Invite List</span><span class="nav-count" id="navInvites">0</span>
+      </div>
+      <div class="nav-subgroup">
+        <div class="nav-item nav-sub" data-view="savedates"><span>Save the Dates</span><span class="nav-count" id="navSaveDates">0</span></div>
+        <div class="nav-item nav-sub" data-view="invitessent"><span>Invites Sent</span><span class="nav-count" id="navInvitesSent">0</span></div>
+        <div class="nav-item nav-sub" data-view="rsvps"><span>RSVPs</span><span class="nav-count" id="navRsvps">0</span></div>
+      </div>
+      <div class="nav-item" data-view="party">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2 20a6 6 0 0 1 12 0M14.5 20a5 5 0 0 1 7 0"/></svg>
+        <span>Wedding Party</span><span class="nav-count" id="navParty">0</span>
+      </div>
+      <div class="nav-item" data-view="venue">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg>
+        <span>Venue</span>
+      </div>
+      <div class="nav-item" data-view="dj">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/><path d="M9 18V5l12-2v13"/></svg>
+        <span>DJ &amp; Music</span><span class="nav-count" id="navDj">0</span>
+      </div>
+      <div class="nav-item" data-view="photo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8a2 2 0 0 1 2-2h2l1.5-2h7L17 6h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="12.5" r="3.2"/></svg>
+        <span>Photo &amp; Video</span><span class="nav-count" id="navPhoto">0</span>
+      </div>
+      <div class="nav-item" data-view="notes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3h11l4 4v14H5z"/><path d="M15 3v5h5M9 13h6M9 17h6"/></svg>
+        <span>Notes &amp; Ideas</span><span class="nav-count" id="navNotes">0</span>
+      </div>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="theme-toggle" id="themeToggle">
+        <div class="tt-slider"></div>
+        <div class="tt-opt on" data-t="light"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg>Light</div>
+        <div class="tt-opt" data-t="dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>Dark</div>
+      </div>
+      <button class="sync-btn" id="syncBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12a8 8 0 0 1-13.7 5.6L4 15M4 12a8 8 0 0 1 13.7-5.6L20 9"/><path d="M4 5v4h4M20 19v-4h-4"/></svg>
+        <span>Cloud Sync</span>
+      </button>
+      <div class="sync-status" id="syncStatus">Saved on this device only</div>
+      <div class="backup-btns">
+        <button class="mini-btn" id="exportBtn">↓ Backup</button>
+        <button class="mini-btn" id="importBtn">↑ Restore</button>
+        <input type="file" id="importInput" accept="application/json" hidden>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===================== MAIN ===================== -->
+  <main class="main">
+
+    <!-- OVERVIEW -->
+    <section class="view active" id="view-overview">
+      <div class="page-head">
+        <div class="eyebrow">At a glance</div>
+        <h2>Overview</h2>
+        <p>A quick summary of everything so far. Tap any tile to jump in and edit the details.</p>
+      </div>
+      <div class="tile-grid" id="overviewTiles"></div>
+    </section>
+
+    <!-- INVITES -->
+    <section class="view" id="view-invites">
+      <div class="page-head">
+        <div class="eyebrow">Guest management</div>
+        <h2>Invite List</h2>
+        <p>Everyone you're inviting, where to send the invitation, and how many guests they bring.</p>
+      </div>
+      <div class="stat-strip" id="inviteStats"></div>
+      <div class="panel">
+        <div class="panel-head">
+          <div><h3>By state</h3><div class="sub">Invitations to send per state</div></div>
+        </div>
+        <div class="state-breakdown" id="stateBreakdown"></div>
+      </div>
+      <div class="add-row">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+          <input type="text" id="inviteSearch" placeholder="Search across everything…">
+        </div>
+        <button class="btn btn-ghost" id="toggleFilters"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18M6 12h12M10 19h4"/></svg>Filters</button>
+        <button class="btn" id="addInviteBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Add invite</button>
+      </div>
+      <div class="filter-bar" id="filterBar">
+        <div class="filter-field"><label>Name</label><input type="text" id="f_name" placeholder="contains…"></div>
+        <div class="filter-field"><label>Address</label><input type="text" id="f_address" placeholder="contains…"></div>
+        <div class="filter-field"><label>City</label><input type="text" id="f_city" placeholder="contains…"></div>
+        <div class="filter-field"><label>State</label><select id="f_state"><option value="">All</option></select></div>
+        <div class="filter-field"><label>Zip</label><input type="text" id="f_zip" placeholder="contains…"></div>
+        <div class="filter-field"><label>Country</label><select id="f_country"><option value="">All</option></select></div>
+        <div class="filter-field"><label>Type</label><select id="f_status"><option value="">All</option><option value="confirmed">Confirmed</option><option value="possible">Possible</option></select></div>
+        <div class="filter-field"><label>Min guests</label><input type="number" min="0" id="f_guests" placeholder="any"></div>
+        <button class="btn btn-ghost btn-sm" id="clearFilters">Clear all</button>
+      </div>
+      <div class="filter-meta" id="filterMeta"></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Name</th><th>Address</th><th>City</th><th>State</th><th>Zip</th><th>Country</th><th>Guests</th><th></th></tr></thead>
+          <tbody id="inviteBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SAVE THE DATES -->
+    <section class="view" id="view-savedates">
+      <div class="page-head">
+        <div class="eyebrow">Invite tracking</div>
+        <h2>Save the Dates</h2>
+        <p>Mark off each household as you send their save-the-date.</p>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-top"><span class="pct" id="sdPct">0%</span><span class="lbl" id="sdLbl">0 of 0 sent</span></div>
+        <div class="progress-track"><div class="progress-fill" id="sdFill" style="width:0%"></div></div>
+      </div>
+      <div class="table-wrap">
+        <table><thead><tr><th>Name</th><th>City</th><th>State</th><th>Guests</th><th style="text-align:center">Sent</th></tr></thead>
+        <tbody id="sdBody"></tbody></table>
+      </div>
+    </section>
+
+    <!-- INVITES SENT -->
+    <section class="view" id="view-invitessent">
+      <div class="page-head">
+        <div class="eyebrow">Invite tracking</div>
+        <h2>Invites Sent</h2>
+        <p>Track who has received their formal invitation.</p>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-top"><span class="pct" id="isPct">0%</span><span class="lbl" id="isLbl">0 of 0 sent</span></div>
+        <div class="progress-track"><div class="progress-fill" id="isFill" style="width:0%"></div></div>
+      </div>
+      <div class="table-wrap">
+        <table><thead><tr><th>Name</th><th>City</th><th>State</th><th>Guests</th><th style="text-align:center">Sent</th></tr></thead>
+        <tbody id="isBody"></tbody></table>
+      </div>
+    </section>
+
+    <!-- RSVPS -->
+    <section class="view" id="view-rsvps">
+      <div class="page-head">
+        <div class="eyebrow">Invite tracking</div>
+        <h2>RSVPs</h2>
+        <p>Log responses and the final headcount attending.</p>
+      </div>
+      <div class="stat-strip" id="rsvpStats"></div>
+      <div class="table-wrap">
+        <table><thead><tr><th>Name</th><th>Invited</th><th>Response</th><th>Attending</th></tr></thead>
+        <tbody id="rsvpBody"></tbody></table>
+      </div>
+    </section>
+
+    <!-- WEDDING PARTY -->
+    <section class="view" id="view-party">
+      <div class="page-head">
+        <div class="eyebrow">Your people</div>
+        <h2>Wedding Party</h2>
+        <p>The bride's side and the groom's side, side by side. Add names, addresses, and roles.</p>
+      </div>
+      <div class="add-row">
+        <button class="btn" id="addPartyBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Add party member</button>
+      </div>
+      <div class="party-cols">
+        <div class="party-side bride">
+          <div class="party-side-head"><span class="side-dot"></span><h3>Bride's Side</h3><span class="side-n" id="brideCount">0</span></div>
+          <div class="party-stack" id="brideStack"></div>
+        </div>
+        <div class="party-side groom">
+          <div class="party-side-head"><span class="side-dot"></span><h3>Groom's Side</h3><span class="side-n" id="groomCount">0</span></div>
+          <div class="party-stack" id="groomStack"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VENUE -->
+    <section class="view" id="view-venue">
+      <div class="page-head">
+        <div class="eyebrow">The place &amp; the plan</div>
+        <h2>Venue</h2>
+        <p>Details, your wedding date, pending items, what you owe them, and the day-of timeline.</p>
+      </div>
+      <div class="field-row grid-2">
+        <div class="panel">
+          <div class="panel-head"><div><h3>Venue details</h3></div></div>
+          <div class="field"><label>Venue name</label><input id="v_name" placeholder="e.g. The Grand Hall"></div>
+          <div class="field"><label>Address</label><input id="v_address" placeholder="Street address"></div>
+          <div class="field-row grid-2">
+            <div class="field"><label>Contact person</label><input id="v_contact" placeholder="Coordinator name"></div>
+            <div class="field"><label>Phone</label><input id="v_phone" placeholder="(555) 000-0000"></div>
+          </div>
+          <div class="field"><label>Email</label><input id="v_email" placeholder="venue@email.com"></div>
+          <div class="field-row grid-2">
+            <div class="field"><label>Wedding date</label><input type="date" id="v_date"></div>
+            <div class="field"><label>Final balance due</label><input id="v_balance" placeholder="$0.00"></div>
+          </div>
+          <div class="field"><label>General notes</label><textarea id="v_notes" placeholder="Capacity, parking, restrictions, decor rules…"></textarea></div>
+          <button class="btn" id="saveVenue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>Save details</button>
+        </div>
+        <div>
+          <div class="panel">
+            <div class="panel-head"><div><h3>Pending items</h3><div class="sub">Still waiting on the venue</div></div></div>
+            <ul class="checklist" id="venuePending"></ul>
+            <div class="add-inline"><input id="addPending" placeholder="Add a pending item…"><button class="btn btn-sm" id="addPendingBtn">Add</button></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><div><h3>We need to provide</h3><div class="sub">Items the venue needs from us</div></div></div>
+            <ul class="checklist" id="venueProvide"></ul>
+            <div class="add-inline"><input id="addProvide" placeholder="Add an item to provide…"><button class="btn btn-sm" id="addProvideBtn">Add</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div><h3>Day-of timeline</h3><div class="sub">The flow of the wedding day</div></div></div>
+        <div class="timeline" id="venueTimeline"></div>
+        <div class="add-inline" style="margin-top:18px">
+          <input type="time" id="tlTime" style="max-width:140px">
+          <input id="tlEvent" placeholder="e.g. Ceremony begins">
+          <button class="btn btn-sm" id="addTimelineBtn">Add</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- DJ -->
+    <section class="view" id="view-dj">
+      <div class="page-head">
+        <div class="eyebrow">Set the mood</div>
+        <h2>DJ &amp; Music</h2>
+        <p>DJs you've visited, who you love, who's a no, and your music wants &amp; don't-wants.</p>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div><h3>DJs we've considered</h3><div class="sub" id="djCount">0 added</div></div>
+          <button class="btn" data-addvendor="dj"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Add a DJ</button></div>
+        <div class="vendor-grid" id="djVendors"></div>
+      </div>
+      <div class="pref-cols">
+        <div class="panel">
+          <div class="panel-head"><div><h3>Songs &amp; vibes we want</h3></div></div>
+          <ul class="pref-list want" id="djWant"></ul>
+          <div class="add-inline"><input id="djWantInput" placeholder="Add something you want…"><button class="btn btn-sm" data-pref="dj-want">Add</button></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div><h3>Hard no's</h3></div></div>
+          <ul class="pref-list dont" id="djDont"></ul>
+          <div class="add-inline"><input id="djDontInput" placeholder="Add something to avoid…"><button class="btn btn-sm" data-pref="dj-dont">Add</button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PHOTO -->
+    <section class="view" id="view-photo">
+      <div class="page-head">
+        <div class="eyebrow">Capture the day</div>
+        <h2>Photo &amp; Video</h2>
+        <p>Photographers &amp; videographers you've met, your favorites, and your shot wishlist.</p>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div><h3>Vendors we've considered</h3><div class="sub" id="photoCount">0 added</div></div>
+          <button class="btn" data-addvendor="photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Add a vendor</button></div>
+        <div class="vendor-grid" id="photoVendors"></div>
+      </div>
+      <div class="pref-cols">
+        <div class="panel">
+          <div class="panel-head"><div><h3>Shots &amp; styles we want</h3></div></div>
+          <ul class="pref-list want" id="photoWant"></ul>
+          <div class="add-inline"><input id="photoWantInput" placeholder="Add something you want…"><button class="btn btn-sm" data-pref="photo-want">Add</button></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div><h3>Things to avoid</h3></div></div>
+          <ul class="pref-list dont" id="photoDont"></ul>
+          <div class="add-inline"><input id="photoDontInput" placeholder="Add something to avoid…"><button class="btn btn-sm" data-pref="photo-dont">Add</button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- NOTES -->
+    <section class="view" id="view-notes">
+      <div class="page-head">
+        <div class="eyebrow">Everything else</div>
+        <h2>Notes &amp; Ideas</h2>
+        <p>Loose thoughts, inspiration, and to-dos. Attach photos or files to any note.</p>
+      </div>
+      <div class="add-row">
+        <button class="btn" id="addNoteBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>New note</button>
+      </div>
+      <div class="notes-grid" id="notesGrid"></div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ===================== MODAL ===================== -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-head"><h3 id="modalTitle">Edit</h3><button class="modal-close" id="modalClose">&times;</button></div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot" id="modalFoot"></div>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox"><img id="lightboxImg" src="" alt=""></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   DATA LAYER
+   ============================================================ */
+const STORE_KEY = "weddingPlannerData_v1";
+const defaultData = {
+  settings: { theme: "light", coupleNames: "", weddingDate: "", updatedAt: 0, sync: { enabled:false, code:"" } },
+  invites: [],
+  party: [],
+  venue: { name:"", address:"", contact:"", phone:"", email:"", date:"", balance:"", notes:"", pending:[], provide:[], timeline:[] },
+  dj:    { vendors:[], want:[], dont:[] },
+  photo: { vendors:[], want:[], dont:[] },
+  notes: []
+};
+
+let data;
+try {
+  const raw = localStorage.getItem(STORE_KEY);
+  data = raw ? deepMerge(structuredClone(defaultData), JSON.parse(raw)) : structuredClone(defaultData);
+} catch(e) { data = structuredClone(defaultData); }
+
+function deepMerge(base, over){
+  for(const k in over){
+    if(over[k] && typeof over[k]==="object" && !Array.isArray(over[k]) && base[k]) deepMerge(base[k], over[k]);
+    else base[k] = over[k];
+  }
+  return base;
+}
+function save(opts){
+  opts = opts || {};
+  if(!opts.silent) data.settings.updatedAt = Date.now();
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); }
+  catch(e){ toast("Storage full — try removing large photos or use Backup."); }
+  if(!opts.silent && data.settings.sync && data.settings.sync.enabled && data.settings.sync.code){ scheduleSync(); }
+}
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+
+/* ============================================================
+   CLOUD SYNC  (optional, opt-in)
+   Talks to your own Netlify Function at /.netlify/functions/sync,
+   which stores data in Netlify Blobs keyed by your sync code.
+   Same-origin = no CORS issues. Local copy is always kept too.
+   ============================================================ */
+const SYNC_DEFAULT_ENDPOINT = "/.netlify/functions/sync";
+let syncTimer = null, syncing = false;
+function syncOn(){ return data.settings.sync && data.settings.sync.enabled && data.settings.sync.code; }
+function syncEndpoint(){ return (data.settings.sync && data.settings.sync.endpoint) || SYNC_DEFAULT_ENDPOINT; }
+function syncUrl(code){ return syncEndpoint() + "?code=" + encodeURIComponent(code); }
+function genCode(){ return "wp-" + Math.random().toString(36).slice(2,7) + Math.random().toString(36).slice(2,7); }
+function scheduleSync(){ clearTimeout(syncTimer); syncTimer = setTimeout(()=>cloudPush(), 1300); }
+
+async function cloudPut(code){
+  const res = await fetch(syncUrl(code), { method:"PUT", headers:{"Content-Type":"application/json"}, body: JSON.stringify(data) });
+  if(!res.ok) throw new Error("server returned "+res.status);
+  return true;
+}
+async function cloudFetch(code){
+  const res = await fetch(syncUrl(code), { headers:{"Accept":"application/json"} });
+  if(res.status === 404){ const e = new Error("no data found for that code"); e.notFound = true; throw e; }
+  if(!res.ok) throw new Error("server returned "+res.status);
+  return await res.json();
+}
+async function cloudPush(announce){
+  const s = data.settings.sync; if(!s || !s.enabled || !s.code) return;
+  try{
+    syncing = true; updateSyncUI();
+    await cloudPut(s.code);
+    s.lastSync = Date.now(); save({silent:true});
+    if(announce) toast("Saved to the cloud");
+  }catch(e){ toast("Couldn't reach cloud sync — your data is safe on this device. ("+e.message+")"); }
+  finally{ syncing = false; updateSyncUI(); }
+}
+async function cloudPullAndApply(announce){
+  const s = data.settings.sync; if(!s || !s.enabled || !s.code) return;
+  try{
+    syncing = true; updateSyncUI();
+    const remote = await cloudFetch(s.code);
+    const localT = data.settings.updatedAt || 0;
+    const remoteT = (remote.settings && remote.settings.updatedAt) || 0;
+    if(remoteT > localT){
+      const keepSync = structuredClone(data.settings.sync);
+      data = deepMerge(structuredClone(defaultData), remote);
+      data.settings.sync = keepSync;
+      localStorage.setItem(STORE_KEY, JSON.stringify(data));
+      applyTheme(data.settings.theme||"light");
+      renderAll();
+      if(announce) toast("Loaded the latest from the cloud");
+    } else if(localT > remoteT){
+      await cloudPush(false);
+      if(announce) toast("This device had newer changes — pushed them up");
+    } else if(announce){ toast("Already up to date"); }
+    s.lastSync = Date.now(); save({silent:true});
+  }catch(e){
+    if(e.notFound){ await cloudPush(false); if(announce) toast("Started a fresh sync with this device's data"); }
+    else { toast("Couldn't reach cloud sync — working from local copy. ("+e.message+")"); }
+  }
+  finally{ syncing = false; updateSyncUI(); }
+}
+
+async function enableNewSync(){
+  try{
+    syncing = true; updateSyncUI();
+    const code = genCode();
+    data.settings.sync = { enabled:true, code, lastSync:0 };
+    await cloudPut(code);                 // confirms the backend is live before committing
+    data.settings.sync.lastSync = Date.now();
+    save({silent:true}); updateSyncUI(); openSyncModal();
+    toast("Cloud sync is on");
+  }catch(e){
+    if(data.settings.sync) data.settings.sync.enabled = false; save({silent:true}); updateSyncUI(); openSyncModal();
+    toast("Sync backend not found ("+e.message+"). Make sure the site finished deploying with the sync function.");
+  }
+  finally{ syncing = false; updateSyncUI(); }
+}
+function connectWithCode(code){
+  code = (code||"").trim();
+  if(!code){ toast("Paste a sync code first."); return; }
+  const proceed = ()=>{
+    data.settings.sync = { enabled:true, code, lastSync:0 };
+    data.settings.updatedAt = 0; // force adopting remote
+    save({silent:true});
+    cloudPullAndApply(true).then(()=>{ updateSyncUI(); if(overlay.classList.contains("open")) openSyncModal(); });
+  };
+  const hasLocal = data.invites.length || data.party.length || data.notes.length || data.venue.name;
+  if(hasLocal) confirmDelete("Connecting will replace this device's current data with the synced copy. Continue?", proceed);
+  else proceed();
+}
+function disableSync(){ if(data.settings.sync) data.settings.sync.enabled = false; save({silent:true}); updateSyncUI(); openSyncModal(); toast("Cloud sync turned off"); }
+
+function syncAgo(){
+  const t = data.settings.sync && data.settings.sync.lastSync;
+  if(!t) return "not yet";
+  const m = Math.round((Date.now()-t)/60000);
+  if(m<1) return "just now"; if(m<60) return m+"m ago";
+  const h=Math.round(m/60); if(h<24) return h+"h ago"; return Math.round(h/24)+"d ago";
+}
+function updateSyncUI(){
+  const el = document.getElementById("syncStatus"); if(!el) return;
+  if(syncing){ el.textContent = "☁ Syncing…"; el.className = "sync-status syncing"; }
+  else if(syncOn()){ el.textContent = "☁ Synced "+syncAgo(); el.className = "sync-status on"; }
+  else { el.textContent = "Saved on this device only"; el.className = "sync-status"; }
+}
+
+function openSyncModal(){
+  const s = data.settings.sync || { enabled:false, code:"" };
+  let body;
+  if(s.enabled && s.code){
+    body = `
+      <p style="color:var(--text-soft);font-size:14px;line-height:1.6;margin-bottom:18px">Cloud sync is <b style="color:var(--accent-purple)">on</b>. Your changes save to the cloud automatically. Open this file on another device, choose <b>Connect with a code</b>, and enter the code below.</p>
+      <div class="field"><label>Your sync code</label>
+        <div style="display:flex;gap:8px"><input id="syncCodeShow" value="${esc(s.code)}" readonly><button class="btn btn-sm" id="copyCode">Copy</button></div>
+      </div>
+      <div style="display:flex;gap:8px;margin:14px 0">
+        <button class="btn btn-sm" id="pullNow">↓ Pull latest</button>
+        <button class="btn btn-sm" id="pushNow">↑ Save now</button>
+      </div>
+      <p style="font-size:12.5px;color:var(--text-faint)">Last synced ${syncAgo()}.</p>
+      <div class="sync-warn">Your planner syncs through <b>your own Netlify site</b>, keyed to this code. Anyone with the code could read it, so keep it private. Keep using <b>Backup</b> now and then for a personal copy.</div>
+      <div style="margin-top:16px"><button class="btn btn-ghost btn-sm" id="disableSyncBtn">Turn off cloud sync</button></div>`;
+  } else {
+    body = `
+      <p style="color:var(--text-soft);font-size:14px;line-height:1.6;margin-bottom:18px">Sync keeps your planner the same across your laptop and phone. Turn it on once here, then enter the same code on your other device.</p>
+      <button class="btn" id="createSyncBtn" style="width:100%;justify-content:center;margin-bottom:18px">✨ Turn on sync (create a new code)</button>
+      <div class="field"><label>Already have a sync code?</label>
+        <div style="display:flex;gap:8px"><input id="connectCode" placeholder="Paste your code…"><button class="btn btn-sm" id="connectBtn">Connect</button></div>
+      </div>
+      <div class="sync-warn">Sync runs through <b>your own Netlify site</b> (it needs the sync function deployed there). It requires an internet connection. Your local copy and <b>Backup/Restore</b> always remain available.</div>`;
+  }
+  openModal("Cloud Sync", body, [{label:"Done", class:"btn btn-ghost", onClick:closeModal}]);
+  const $ = id=>document.getElementById(id);
+  if($("createSyncBtn")) $("createSyncBtn").onclick = enableNewSync;
+  if($("connectBtn")) $("connectBtn").onclick = ()=>connectWithCode($("connectCode").value);
+  if($("copyCode")) $("copyCode").onclick = ()=>{ const i=$("syncCodeShow"); i.select(); try{document.execCommand("copy");}catch(e){} navigator.clipboard&&navigator.clipboard.writeText(i.value); toast("Code copied"); };
+  if($("pullNow")) $("pullNow").onclick = ()=>cloudPullAndApply(true);
+  if($("pushNow")) $("pushNow").onclick = ()=>cloudPush(true);
+  if($("disableSyncBtn")) $("disableSyncBtn").onclick = disableSync;
+}
+
+/* ============================================================
+   THEME
+   ============================================================ */
+function applyTheme(t){
+  document.documentElement.setAttribute("data-theme", t);
+  document.querySelectorAll(".tt-opt").forEach(o => o.classList.toggle("on", o.dataset.t === t));
+  data.settings.theme = t; save();
+}
+applyTheme(data.settings.theme || "light");
+document.getElementById("themeToggle").addEventListener("click", () => {
+  applyTheme(document.documentElement.getAttribute("data-theme")==="light" ? "dark" : "light");
+});
+
+/* ============================================================
+   NAV
+   ============================================================ */
+document.getElementById("nav").addEventListener("click", e => {
+  const item = e.target.closest(".nav-item"); if(!item) return;
+  switchView(item.dataset.view);
+});
+function switchView(v){
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.toggle("active", n.dataset.view===v));
+  document.querySelectorAll(".view").forEach(s => s.classList.toggle("active", s.id==="view-"+v));
+  document.querySelector(".main").scrollTop = 0;
+}
+
+/* ============================================================
+   TOAST + LIGHTBOX
+   ============================================================ */
+let toastT;
+function toast(msg){
+  const t = document.getElementById("toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove("show"), 2600);
+}
+const lightbox = document.getElementById("lightbox");
+lightbox.addEventListener("click", ()=>lightbox.classList.remove("open"));
+function openLightbox(src){ document.getElementById("lightboxImg").src = src; lightbox.classList.add("open"); }
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+const overlay = document.getElementById("modalOverlay");
+function openModal(title, bodyHTML, footButtons){
+  document.getElementById("modalTitle").textContent = title;
+  document.getElementById("modalBody").innerHTML = bodyHTML;
+  const foot = document.getElementById("modalFoot"); foot.innerHTML = "";
+  footButtons.forEach(b=>{
+    const btn = document.createElement("button");
+    btn.className = b.class || "btn"; btn.textContent = b.label; btn.onclick = b.onClick;
+    foot.appendChild(btn);
+  });
+  overlay.classList.add("open");
+}
+function closeModal(){ overlay.classList.remove("open"); }
+document.getElementById("modalClose").onclick = closeModal;
+overlay.addEventListener("click", e=>{ if(e.target===overlay) closeModal(); });
+
+/* ============================================================
+   RENDER: OVERVIEW
+   ============================================================ */
+const US_STATE = s => (s||"").trim().toUpperCase();
+function totalGuests(){ return data.invites.reduce((a,i)=>a+(parseInt(i.guests)||0),0); }
+function daysUntil(){
+  if(!data.venue.date) return null;
+  const d = new Date(data.venue.date+"T00:00:00"); const now = new Date(); now.setHours(0,0,0,0);
+  return Math.ceil((d-now)/86400000);
+}
+function vendorVerdict(list){
+  const liked = list.filter(v=>v.status==="like").length;
+  return liked;
+}
+function renderOverview(){
+  const inv = data.invites.length, guests = totalGuests();
+  const days = daysUntil();
+  const venueSet = !!data.venue.name;
+  const djLiked = vendorVerdict(data.dj.vendors), photoLiked = vendorVerdict(data.photo.vendors);
+  const pendingOpen = data.venue.pending.filter(p=>!p.done).length;
+  const confirmedInv = data.invites.filter(i=>!i.possible).length;
+  const possibleInv = data.invites.filter(i=>i.possible).length;
+  const maybeGuestSum = data.invites.reduce((a,i)=>a+(parseInt(i.maybeGuests)||0),0);
+  const rsvpYes = data.invites.filter(i=>i.rsvp==="yes").length;
+  const rsvpNo = data.invites.filter(i=>i.rsvp==="no").length;
+  const stdSent = data.invites.filter(i=>i.saveTheDate).length;
+  const invSent = data.invites.filter(i=>i.inviteSent).length;
+
+  const dateStr = data.venue.date ? new Date(data.venue.date+"T00:00:00").toLocaleDateString(undefined,{month:"long",day:"numeric",year:"numeric"}) : "Not set";
+
+  const tiles = [
+    { view:"venue", icon:icon("cal"), label:"Days to go", value: days===null?"—":(days<0?"Married! 🎉":days), sub: dateStr, tag: data.venue.date?["tag-ok","Date locked"]:["tag-todo","Pick a date"] },
+    { view:"invites", icon:icon("list"), label:"Invitations", value: confirmedInv, sub: possibleInv?`+ ${possibleInv} possible · ${data.invites.length} total`:`${data.invites.length} household${data.invites.length!==1?"s":""}`, tag:["tag-todo", guests+" confirmed guests"] },
+    { view:"invites", icon:icon("users"), label:"Total guests", value: guests, sub: maybeGuestSum?`+ ${maybeGuestSum} maybe guests`:"Across all invitations" },
+    { view:"rsvps", icon:icon("rsvp"), label:"RSVPs", value: rsvpYes, sub: `${rsvpYes} yes · ${rsvpNo} no · ${data.invites.length-rsvpYes-rsvpNo} awaiting`, tag: (stdSent||invSent)?["tag-ok",`${invSent} invites sent`]:["tag-todo",`${stdSent} save-the-dates`] },
+    { view:"party", icon:icon("party"), label:"Wedding party", value: data.party.length, sub: partySummary(), tag: data.party.length?["tag-ok","Lineup set"]:["tag-todo","Add your people"] },
+    { view:"venue", icon:icon("venue"), label:"Venue", value: venueSet?(data.venue.name.length>12?data.venue.name.slice(0,12)+"…":data.venue.name):"—", valSm:true, sub: venueSet?(pendingOpen+" pending item"+(pendingOpen!==1?"s":"")):"Not chosen yet", tag: venueSet?(pendingOpen?["tag-warn",pendingOpen+" pending"]:["tag-ok","All set"]):["tag-todo","To do"] },
+    { view:"dj", icon:icon("music"), label:"DJ & Music", value: data.dj.vendors.length, sub: djLiked+" we love · "+data.dj.vendors.length+" considered", tag: djLiked?["tag-ok",djLiked+" favorite"+(djLiked>1?"s":"")]:["tag-todo","Still looking"] },
+    { view:"photo", icon:icon("camera"), label:"Photo & Video", value: data.photo.vendors.length, sub: photoLiked+" we love · "+data.photo.vendors.length+" considered", tag: photoLiked?["tag-ok",photoLiked+" favorite"+(photoLiked>1?"s":"")]:["tag-todo","Still looking"] },
+    { view:"notes", icon:icon("note"), label:"Notes & ideas", value: data.notes.length, sub:"Saved thoughts & inspiration" },
+  ];
+
+  document.getElementById("overviewTiles").innerHTML = tiles.map(t=>`
+    <div class="tile clickable" data-go="${t.view}">
+      <div class="tile-glow"></div>
+      <div class="tile-icon">${t.icon}</div>
+      <div class="tile-label">${t.label}</div>
+      <div class="tile-value ${t.valSm?"sm":""}">${t.value}</div>
+      ${t.sub?`<div class="tile-sub">${t.sub}</div>`:""}
+      ${t.tag?`<div class="tile-tag ${t.tag[0]}">${t.tag[1]}</div>`:""}
+    </div>`).join("");
+
+  document.querySelectorAll("[data-go]").forEach(el=> el.onclick = ()=>switchView(el.dataset.go));
+}
+
+function icon(n){
+  const i = {
+    cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>',
+    list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>',
+    users:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0M16 5.5a3 3 0 0 1 0 6M21 20a5.5 5.5 0 0 0-4-5.3"/></svg>',
+    venue:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg>',
+    music:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/><path d="M9 18V5l12-2v13"/></svg>',
+    camera:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8a2 2 0 0 1 2-2h2l1.5-2h7L17 6h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="12.5" r="3.2"/></svg>',
+    note:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3h11l4 4v14H5z"/><path d="M15 3v5h5M9 13h6M9 17h6"/></svg>',
+    party:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2 20a6 6 0 0 1 12 0M14.5 20a5 5 0 0 1 7 0"/></svg>',
+    rsvp:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v12H7l-3 3z"/><path d="M8 9l2.5 2.5L15 7"/></svg>',
+  };
+  return i[n]||"";
+}
+
+/* ============================================================
+   RENDER: INVITES
+   ============================================================ */
+let inviteFilters = { q:"", name:"", address:"", city:"", state:"", zip:"", country:"", status:"", guests:"" };
+document.getElementById("inviteSearch").addEventListener("input", e=>{ inviteFilters.q = e.target.value.toLowerCase(); renderInvites(); });
+document.getElementById("toggleFilters").onclick = ()=>document.getElementById("filterBar").classList.toggle("open");
+["name","address","city","zip"].forEach(f=>{
+  document.getElementById("f_"+f).addEventListener("input", e=>{ inviteFilters[f]=e.target.value.toLowerCase(); renderInvites(); });
+});
+document.getElementById("f_state").addEventListener("change", e=>{ inviteFilters.state=e.target.value; renderInvites(); });
+document.getElementById("f_country").addEventListener("change", e=>{ inviteFilters.country=e.target.value; renderInvites(); });
+document.getElementById("f_status").addEventListener("change", e=>{ inviteFilters.status=e.target.value; renderInvites(); });
+document.getElementById("f_guests").addEventListener("input", e=>{ inviteFilters.guests=e.target.value; renderInvites(); });
+document.getElementById("clearFilters").onclick = ()=>{
+  inviteFilters = { q:"", name:"", address:"", city:"", state:"", zip:"", country:"", status:"", guests:"" };
+  document.getElementById("inviteSearch").value="";
+  ["name","address","city","zip","guests"].forEach(f=>document.getElementById("f_"+f).value="");
+  document.getElementById("f_state").value=""; document.getElementById("f_country").value=""; document.getElementById("f_status").value="";
+  renderInvites();
+};
+
+function populateFilterDropdowns(){
+  const states = [...new Set(data.invites.map(i=>US_STATE(i.state)).filter(Boolean))].sort();
+  const countries = [...new Set(data.invites.map(i=>(i.country||"").trim()).filter(Boolean))].sort();
+  const sSel=document.getElementById("f_state"), cSel=document.getElementById("f_country");
+  sSel.innerHTML = `<option value="">All</option>`+states.map(s=>`<option value="${esc(s)}" ${inviteFilters.state===s?"selected":""}>${esc(s)}</option>`).join("");
+  cSel.innerHTML = `<option value="">All</option>`+countries.map(c=>`<option value="${esc(c)}" ${inviteFilters.country===c?"selected":""}>${esc(c)}</option>`).join("");
+}
+function matchInvite(i){
+  const f=inviteFilters;
+  if(f.q && ![i.name,i.address,i.city,i.state,i.zip,i.country].join(" ").toLowerCase().includes(f.q)) return false;
+  if(f.name && !(i.name||"").toLowerCase().includes(f.name)) return false;
+  if(f.address && !(i.address||"").toLowerCase().includes(f.address)) return false;
+  if(f.city && !(i.city||"").toLowerCase().includes(f.city)) return false;
+  if(f.state && US_STATE(i.state)!==f.state) return false;
+  if(f.zip && !(i.zip||"").toLowerCase().includes(f.zip)) return false;
+  if(f.country && (i.country||"").trim()!==f.country) return false;
+  if(f.status==="possible" && !i.possible) return false;
+  if(f.status==="confirmed" && i.possible) return false;
+  if(f.guests && (parseInt(i.guests)||0) < parseInt(f.guests)) return false;
+  return true;
+}
+function filtersActive(){ return Object.values(inviteFilters).some(v=>v!==""); }
+
+function renderInviteStats(){
+  const confirmed = data.invites.filter(i=>!i.possible);
+  const possible  = data.invites.filter(i=>i.possible);
+  const confGuests = confirmed.reduce((a,i)=>a+(parseInt(i.guests)||0),0);
+  const maybeGuests = data.invites.reduce((a,i)=>a+(parseInt(i.maybeGuests)||0),0);
+  const possGuests = possible.reduce((a,i)=>a+(parseInt(i.guests)||0),0);
+  const grandTotal = confGuests + possGuests + maybeGuests;
+  const states = {};
+  data.invites.forEach(i=>{ const s=US_STATE(i.state)||"—"; states[s]=(states[s]||0)+1; });
+  document.getElementById("inviteStats").innerHTML = `
+    <div class="stat-pill"><div class="n">${confirmed.length}</div><div class="l">Invitations to send</div></div>
+    <div class="stat-pill"><div class="n">${possible.length}</div><div class="l">Possible invites</div></div>
+    <div class="stat-pill"><div class="n">${confGuests}</div><div class="l">Confirmed guests</div></div>
+    <div class="stat-pill"><div class="n">+${possGuests + maybeGuests}</div><div class="l">Maybe guests</div></div>
+    <div class="stat-pill"><div class="n">${grandTotal}</div><div class="l">Max possible guests</div></div>`;
+  const sorted = Object.entries(states).sort((a,b)=>b[1]-a[1]);
+  document.getElementById("stateBreakdown").innerHTML = sorted.length
+    ? sorted.map(([s,n])=>`<div class="state-chip">${s} <b>${n}</b></div>`).join("")
+    : `<div class="tile-sub">No invitations yet.</div>`;
+}
+function renderInvites(){
+  renderInviteStats();
+  populateFilterDropdowns();
+  document.getElementById("navInvites").textContent = data.invites.length;
+  const body = document.getElementById("inviteBody");
+  const rows = data.invites.filter(matchInvite);
+  const meta = document.getElementById("filterMeta");
+  meta.textContent = filtersActive() ? `Showing ${rows.length} of ${data.invites.length} invitations · ${rows.reduce((a,i)=>a+(parseInt(i.guests)||0),0)} guests in view` : "";
+  if(!rows.length){
+    body.innerHTML = `<tr><td colspan="8"><div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6h16M4 12h16M4 18h10"/></svg><p>${data.invites.length?"No matches for these filters.":"No invitations yet. Add your first guest above."}</p></div></td></tr>`;
+    return;
+  }
+  body.innerHTML = rows.map(i=>`
+    <tr>
+      <td><b>${esc(i.name)}</b>${i.possible?` <span class="badge badge-possible">Possible</span>`:""}</td>
+      <td>${esc(i.address)||"—"}</td>
+      <td>${esc(i.city)||"—"}</td>
+      <td>${esc(US_STATE(i.state))||"—"}</td>
+      <td>${esc(i.zip)||"—"}</td>
+      <td>${esc(i.country)||"—"}</td>
+      <td><b>${i.guests||0}</b>${(parseInt(i.maybeGuests)||0)>0?` <span class="guest-maybe">+${i.maybeGuests}?</span>`:""}</td>
+      <td><div class="row-actions">
+        <button class="icon-btn" data-edit-inv="${i.id}">${editIcon()}</button>
+        <button class="icon-btn del" data-del-inv="${i.id}">${trashIcon()}</button>
+      </div></td>
+    </tr>`).join("");
+  body.querySelectorAll("[data-edit-inv]").forEach(b=>b.onclick=()=>inviteModal(b.dataset.editInv));
+  body.querySelectorAll("[data-del-inv]").forEach(b=>b.onclick=()=>{
+    confirmDelete("Remove this invitation?", ()=>{ data.invites = data.invites.filter(x=>x.id!==b.dataset.delInv); save(); renderInvites(); renderTrackers(); renderOverview(); });
+  });
+}
+function inviteModal(id){
+  const it = id ? data.invites.find(x=>x.id===id) : {name:"",address:"",city:"",state:"",zip:"",country:"USA",guests:1,maybeGuests:0,possible:false};
+  openModal(id?"Edit invitation":"Add invitation", `
+    <div class="possible-row" id="m_possible_row">
+      <button type="button" class="possible-toggle ${it.possible?"on":""}" id="m_possible">
+        <span class="pt-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span>
+        <span>Mark as a <b>possible</b> invite (not yet confirmed)</span>
+      </button>
+    </div>
+    <div class="field"><label>Name</label><input id="m_name" value="${esc(it.name)}" placeholder="Who you're inviting"></div>
+    <div class="field"><label>Street address</label><input id="m_address" value="${esc(it.address)}" placeholder="123 Main St"></div>
+    <div class="field-row grid-2">
+      <div class="field"><label>City</label><input id="m_city" value="${esc(it.city)}"></div>
+      <div class="field"><label>State</label><input id="m_state" value="${esc(it.state)}" placeholder="NY"></div>
+    </div>
+    <div class="field-row grid-2">
+      <div class="field"><label>Zip code</label><input id="m_zip" value="${esc(it.zip)}"></div>
+      <div class="field"><label>Country</label><input id="m_country" value="${esc(it.country)}"></div>
+    </div>
+    <div class="field-row grid-2">
+      <div class="field"><label>Guests (confirmed)</label><input type="number" min="0" id="m_guests" value="${it.guests||0}"></div>
+      <div class="field"><label>Maybe guests (tentative)</label><input type="number" min="0" id="m_maybe" value="${it.maybeGuests||0}"></div>
+    </div>`,
+    [
+      {label:"Cancel", class:"btn btn-ghost", onClick:closeModal},
+      {label: id?"Save changes":"Add to list", onClick:()=>{
+        const existing = id ? data.invites.find(x=>x.id===id) : {};
+        const obj = {
+          ...existing,
+          id: id||uid(),
+          name: val("m_name"), address: val("m_address"), city: val("m_city"),
+          state: val("m_state"), zip: val("m_zip"), country: val("m_country"),
+          guests: parseInt(val("m_guests"))||0,
+          maybeGuests: parseInt(val("m_maybe"))||0,
+          possible: document.getElementById("m_possible").classList.contains("on")
+        };
+        if(!obj.name.trim()){ toast("Please enter a name."); return; }
+        if(id) data.invites = data.invites.map(x=>x.id===id?obj:x);
+        else data.invites.push(obj);
+        save(); renderInvites(); renderTrackers(); renderOverview(); closeModal();
+        toast(id?"Invitation updated":"Invitation added");
+      }}
+    ]);
+  document.getElementById("m_possible").onclick = function(){ this.classList.toggle("on"); };
+}
+document.getElementById("addInviteBtn").onclick = ()=>inviteModal(null);
+
+/* ============================================================
+   RENDER: INVITE TRACKERS (Save the Dates / Invites Sent / RSVPs)
+   ============================================================ */
+function emptyRow(cols,msg){ return `<tr><td colspan="${cols}"><div class="empty" style="padding:40px 20px"><p>${msg}</p></div></td></tr>`; }
+const guestCell = i => `${i.guests||0}${(parseInt(i.maybeGuests)||0)>0?` <span class="guest-maybe">+${i.maybeGuests}?</span>`:""}`;
+
+function renderTrackers(){ renderSaveDates(); renderInvitesSent(); renderRsvps(); }
+
+function trackerTable(field, prefix){
+  const body = document.getElementById(prefix+"Body");
+  const total = data.invites.length;
+  const sent = data.invites.filter(i=>i[field]).length;
+  const pct = total ? Math.round(sent/total*100) : 0;
+  document.getElementById(prefix+"Pct").textContent = pct+"%";
+  document.getElementById(prefix+"Lbl").textContent = `${sent} of ${total} sent`;
+  document.getElementById(prefix+"Fill").style.width = pct+"%";
+  if(!total){ body.innerHTML = emptyRow(5,"No invitations yet — add households in the Invite List first."); return; }
+  body.innerHTML = data.invites.map(i=>`
+    <tr>
+      <td><b>${esc(i.name)}</b>${i.possible?` <span class="badge badge-possible">Possible</span>`:""}</td>
+      <td>${esc(i.city)||"—"}</td>
+      <td>${esc(US_STATE(i.state))||"—"}</td>
+      <td>${guestCell(i)}</td>
+      <td style="text-align:center"><div class="toggle-btn ${i[field]?"on":""}" data-tog="${field}:${i.id}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></div></td>
+    </tr>`).join("");
+  body.querySelectorAll("[data-tog]").forEach(t=>t.onclick=()=>{
+    const [f,id]=t.dataset.tog.split(":"); const it=data.invites.find(x=>x.id===id); it[f]=!it[f];
+    save(); renderTrackers(); renderOverview();
+  });
+}
+function renderSaveDates(){ trackerTable("saveTheDate","sd"); document.getElementById("navSaveDates").textContent = data.invites.filter(i=>i.saveTheDate).length; }
+function renderInvitesSent(){ trackerTable("inviteSent","is"); document.getElementById("navInvitesSent").textContent = data.invites.filter(i=>i.inviteSent).length; }
+
+function renderRsvps(){
+  const body = document.getElementById("rsvpBody");
+  const yes = data.invites.filter(i=>i.rsvp==="yes");
+  const no  = data.invites.filter(i=>i.rsvp==="no");
+  const pending = data.invites.filter(i=>(i.rsvp||"pending")==="pending");
+  const attending = yes.reduce((a,i)=>a+(i.rsvpGuests!=null?(parseInt(i.rsvpGuests)||0):(parseInt(i.guests)||0)),0);
+  document.getElementById("navRsvps").textContent = yes.length + no.length;
+  document.getElementById("rsvpStats").innerHTML = `
+    <div class="stat-pill"><div class="n">${yes.length}</div><div class="l">Attending</div></div>
+    <div class="stat-pill"><div class="n">${no.length}</div><div class="l">Declined</div></div>
+    <div class="stat-pill"><div class="n">${pending.length}</div><div class="l">Awaiting reply</div></div>
+    <div class="stat-pill"><div class="n">${attending}</div><div class="l">Guests attending</div></div>`;
+  if(!data.invites.length){ body.innerHTML = emptyRow(4,"No invitations yet — add households in the Invite List first."); return; }
+  body.innerHTML = data.invites.map(i=>{
+    const status = i.rsvp||"pending";
+    const badge = status==="yes"?`<span class="badge badge-yes">Yes</span>`:status==="no"?`<span class="badge badge-no">No</span>`:`<span class="badge badge-pending">Pending</span>`;
+    return `<tr>
+      <td><b>${esc(i.name)}</b> ${badge}</td>
+      <td>${guestCell(i)}</td>
+      <td><select class="rsvp-select" data-rsvp="${i.id}">
+        <option value="pending" ${status==="pending"?"selected":""}>Awaiting</option>
+        <option value="yes" ${status==="yes"?"selected":""}>Attending</option>
+        <option value="no" ${status==="no"?"selected":""}>Declined</option>
+      </select></td>
+      <td>${status==="yes"
+        ? `<input type="number" min="0" class="rsvp-num" data-rsvpnum="${i.id}" value="${i.rsvpGuests!=null?i.rsvpGuests:(i.guests||0)}">`
+        : `<span style="color:var(--text-faint)">—</span>`}</td>
+    </tr>`;
+  }).join("");
+  body.querySelectorAll("[data-rsvp]").forEach(s=>s.onchange=()=>{
+    const it=data.invites.find(x=>x.id===s.dataset.rsvp); it.rsvp=s.value;
+    if(it.rsvp==="yes" && it.rsvpGuests==null) it.rsvpGuests=it.guests||0;
+    save(); renderRsvps(); renderOverview();
+  });
+  body.querySelectorAll("[data-rsvpnum]").forEach(n=>n.onchange=()=>{
+    const it=data.invites.find(x=>x.id===n.dataset.rsvpnum); it.rsvpGuests=parseInt(n.value)||0; save(); renderRsvps(); renderOverview();
+  });
+}
+
+/* ============================================================
+   RENDER: WEDDING PARTY
+   ============================================================ */
+const PARTY_ROLES = ["Bride","Groom","Maid of Honor","Best Man","Bridesmaid","Groomsman"];
+// side: which column · tier: 1 = most highlighted, 2 = second, 3 = normal
+const ROLE_META = {
+  "Bride":          { side:"bride", tier:1, order:0 },
+  "Groom":          { side:"groom", tier:1, order:0 },
+  "Maid of Honor":  { side:"bride", tier:2, order:1 },
+  "Best Man":       { side:"groom", tier:2, order:1 },
+  "Bridesmaid":     { side:"bride", tier:3, order:2 },
+  "Groomsman":      { side:"groom", tier:3, order:2 },
+};
+function partySummary(){
+  if(!data.party.length) return "No one added yet";
+  const b = data.party.filter(p=>ROLE_META[p.role]?.side==="bride").length;
+  const g = data.party.filter(p=>ROLE_META[p.role]?.side==="groom").length;
+  return `${b} on bride's side · ${g} on groom's side`;
+}
+function initials(name){ return (name||"?").trim().split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase()||"?"; }
+
+function renderParty(){
+  document.getElementById("navParty").textContent = data.party.length;
+  ["bride","groom"].forEach(side=>{
+    const members = data.party
+      .filter(p=>ROLE_META[p.role]?.side===side)
+      .sort((a,b)=>(ROLE_META[a.role].order-ROLE_META[b.role].order) || a.name.localeCompare(b.name));
+    document.getElementById(side+"Count").textContent = members.length;
+    const stack = document.getElementById(side+"Stack");
+    if(!members.length){
+      stack.innerHTML = `<div class="empty" style="padding:30px 12px"><p>No one here yet.</p></div>`;
+      return;
+    }
+    stack.innerHTML = members.map(p=>{
+      const tier = ROLE_META[p.role].tier;
+      return `<div class="pm-card tier${tier} ${side}">
+        <div class="pm-avatar">${initials(p.name)}</div>
+        <div class="pm-info">
+          <div class="pm-name">${esc(p.name)}</div>
+          <div class="pm-role">${esc(p.role)}</div>
+          ${p.address?`<div class="pm-addr">${esc(p.address)}</div>`:""}
+        </div>
+        <div class="pm-actions">
+          <button class="icon-btn" data-editp="${p.id}">${editIcon()}</button>
+          <button class="icon-btn del" data-delp="${p.id}">${trashIcon()}</button>
+        </div>
+      </div>`;
+    }).join("");
+    stack.querySelectorAll("[data-editp]").forEach(b=>b.onclick=()=>partyModal(b.dataset.editp));
+    stack.querySelectorAll("[data-delp]").forEach(b=>b.onclick=()=>confirmDelete("Remove this person from the wedding party?",()=>{ data.party=data.party.filter(x=>x.id!==b.dataset.delp); save(); renderParty(); renderOverview(); }));
+  });
+}
+function partyModal(id){
+  const p = id ? data.party.find(x=>x.id===id) : {name:"",address:"",role:"Bridesmaid"};
+  openModal(id?"Edit party member":"Add party member", `
+    <div class="field"><label>Name</label><input id="p_name" value="${esc(p.name)}" placeholder="Full name"></div>
+    <div class="field"><label>Role</label>
+      <select id="p_role">${PARTY_ROLES.map(r=>`<option value="${r}" ${p.role===r?"selected":""}>${r}</option>`).join("")}</select></div>
+    <div class="field"><label>Address</label><input id="p_address" value="${esc(p.address)}" placeholder="Mailing address (optional)"></div>`,
+    [
+      {label:"Cancel", class:"btn btn-ghost", onClick:closeModal},
+      {label:id?"Save changes":"Add to party", onClick:()=>{
+        const obj={id:id||uid(),name:val("p_name"),role:val("p_role"),address:val("p_address")};
+        if(!obj.name.trim()){ toast("Please enter a name."); return; }
+        if(id) data.party=data.party.map(x=>x.id===id?obj:x); else data.party.push(obj);
+        save(); renderParty(); renderOverview(); closeModal(); toast(id?"Party member updated":"Added to the party");
+      }}
+    ]);
+}
+document.getElementById("addPartyBtn").onclick = ()=>partyModal(null);
+
+/* ============================================================
+   RENDER: VENUE
+   ============================================================ */
+function loadVenueFields(){
+  ["name","address","contact","phone","email","date","balance","notes"].forEach(f=>{
+    const el = document.getElementById("v_"+f); if(el) el.value = data.venue[f]||"";
+  });
+  renderVenueDate();
+}
+function renderVenueDate(){
+  const dl = document.getElementById("dateLine");
+  if(data.venue.date){
+    const d = new Date(data.venue.date+"T00:00:00");
+    dl.textContent = d.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric",year:"numeric"});
+  } else dl.textContent = "Set your date in the Venue tab";
+  const ct = document.getElementById("coupleTitle");
+  ct.innerHTML = data.settings.coupleNames ? esc(data.settings.coupleNames) : 'Our <span class="amp">&amp;</span> Day';
+}
+document.getElementById("saveVenue").onclick = ()=>{
+  ["name","address","contact","phone","email","date","balance","notes"].forEach(f=>{
+    data.venue[f] = document.getElementById("v_"+f).value;
+  });
+  save(); renderVenueDate(); renderOverview(); toast("Venue details saved");
+};
+
+function renderChecklist(listKey, elId){
+  const ul = document.getElementById(elId); const arr = data.venue[listKey];
+  if(!arr.length){ ul.innerHTML = `<li style="background:transparent;border:none;color:var(--text-faint);font-size:13px;padding:8px 0">Nothing here yet.</li>`; return; }
+  ul.innerHTML = arr.map(it=>`
+    <li class="${it.done?"done":""}">
+      <div class="check ${it.done?"on":""}" data-check="${listKey}:${it.id}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></div>
+      <span>${esc(it.text)}</span>
+      <span class="x" data-rm="${listKey}:${it.id}">&times;</span>
+    </li>`).join("");
+  ul.querySelectorAll("[data-check]").forEach(c=>c.onclick=()=>{
+    const [k,id]=c.dataset.check.split(":"); const item=data.venue[k].find(x=>x.id===id); item.done=!item.done; save(); renderChecklist(k,elId); renderOverview();
+  });
+  ul.querySelectorAll("[data-rm]").forEach(x=>x.onclick=()=>{
+    const [k,id]=x.dataset.rm.split(":"); data.venue[k]=data.venue[k].filter(i=>i.id!==id); save(); renderChecklist(k,elId); renderOverview();
+  });
+}
+function addChecklistItem(listKey, inputId, elId){
+  const inp=document.getElementById(inputId); const t=inp.value.trim(); if(!t) return;
+  data.venue[listKey].push({id:uid(),text:t,done:false}); inp.value=""; save(); renderChecklist(listKey,elId); renderOverview();
+}
+document.getElementById("addPendingBtn").onclick=()=>addChecklistItem("pending","addPending","venuePending");
+document.getElementById("addProvideBtn").onclick=()=>addChecklistItem("provide","addProvide","venueProvide");
+document.getElementById("addPending").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("addPendingBtn").click();});
+document.getElementById("addProvide").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("addProvideBtn").click();});
+
+function renderTimeline(){
+  const tl=document.getElementById("venueTimeline");
+  const arr=[...data.venue.timeline].sort((a,b)=>(a.time||"").localeCompare(b.time||""));
+  if(!arr.length){ tl.innerHTML=`<div class="tile-sub" style="padding-left:0">No timeline events yet. Add the first moment below.</div>`; return; }
+  tl.innerHTML = arr.map(t=>`
+    <div class="tl-item">
+      <div class="tl-time">${fmtTime(t.time)}</div>
+      <div class="tl-dot"></div>
+      <div class="tl-body"><span>${esc(t.event)}</span><span class="x" data-rmtl="${t.id}" style="cursor:pointer;color:var(--text-faint);font-size:18px">&times;</span></div>
+    </div>`).join("");
+  tl.querySelectorAll("[data-rmtl]").forEach(x=>x.onclick=()=>{ data.venue.timeline=data.venue.timeline.filter(i=>i.id!==x.dataset.rmtl); save(); renderTimeline(); });
+}
+function fmtTime(t){ if(!t) return ""; const [h,m]=t.split(":"); const hh=parseInt(h); const ap=hh>=12?"PM":"AM"; const h12=hh%12||12; return `${h12}:${m} ${ap}`; }
+document.getElementById("addTimelineBtn").onclick=()=>{
+  const time=document.getElementById("tlTime").value, ev=document.getElementById("tlEvent").value.trim();
+  if(!ev){ toast("Add an event description."); return; }
+  data.venue.timeline.push({id:uid(),time,event:ev}); document.getElementById("tlTime").value=""; document.getElementById("tlEvent").value="";
+  save(); renderTimeline();
+};
+document.getElementById("tlEvent").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("addTimelineBtn").click();});
+
+/* ============================================================
+   RENDER: VENDORS (DJ + PHOTO share logic)
+   ============================================================ */
+function renderVendors(cat){
+  const el = document.getElementById(cat+"Vendors");
+  const arr = data[cat].vendors;
+  document.getElementById("nav"+cap(cat)).textContent = arr.length;
+  document.getElementById(cat+"Count").textContent = arr.length+" added";
+  if(!arr.length){ el.innerHTML=`<div class="empty" style="grid-column:1/-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg><p>No vendors added yet. Click "Add" to log the first one.</p></div>`; return; }
+  el.innerHTML = arr.map(v=>`
+    <div class="vendor-card ${v.status}">
+      <div class="vc-top">
+        <div><h4>${esc(v.name)}</h4><div class="vc-meta">${[esc(v.contact),esc(v.price)].filter(Boolean).join(" · ")||"&nbsp;"}</div></div>
+        <span class="verdict ${v.status}">${v.status==="like"?"Love it":v.status==="dislike"?"Pass":"Maybe"}</span>
+      </div>
+      <div class="rating">${[1,2,3,4,5].map(s=>`<span class="star ${s<=(v.rating||0)?"on":""}">★</span>`).join("")}</div>
+      ${v.notes?`<div class="vc-notes">${esc(v.notes)}</div>`:""}
+      <div class="vc-actions">
+        <button class="btn btn-ghost btn-sm" data-editv="${cat}:${v.id}">Edit</button>
+        <button class="btn btn-danger btn-sm" data-delv="${cat}:${v.id}">Delete</button>
+      </div>
+    </div>`).join("");
+  el.querySelectorAll("[data-editv]").forEach(b=>b.onclick=()=>{ const [c,id]=b.dataset.editv.split(":"); vendorModal(c,id); });
+  el.querySelectorAll("[data-delv]").forEach(b=>b.onclick=()=>{ const [c,id]=b.dataset.delv.split(":"); confirmDelete("Delete this vendor?",()=>{ data[c].vendors=data[c].vendors.filter(x=>x.id!==id); save(); renderVendors(c); renderOverview(); }); });
+}
+function vendorModal(cat, id){
+  const v = id ? data[cat].vendors.find(x=>x.id===id) : {name:"",contact:"",price:"",rating:0,status:"maybe",notes:""};
+  const label = cat==="dj"?"DJ":"vendor";
+  openModal(id?`Edit ${label}`:`Add ${label}`, `
+    <div class="field"><label>Name / business</label><input id="vm_name" value="${esc(v.name)}"></div>
+    <div class="field-row grid-2">
+      <div class="field"><label>Contact</label><input id="vm_contact" value="${esc(v.contact)}" placeholder="phone / email / site"></div>
+      <div class="field"><label>Price / quote</label><input id="vm_price" value="${esc(v.price||"")}" placeholder="$"></div>
+    </div>
+    <div class="field-row grid-2">
+      <div class="field"><label>Verdict</label>
+        <select id="vm_status">
+          <option value="like" ${v.status==="like"?"selected":""}>👍 Love it</option>
+          <option value="maybe" ${v.status==="maybe"?"selected":""}>🤔 Maybe</option>
+          <option value="dislike" ${v.status==="dislike"?"selected":""}>👎 Pass</option>
+        </select></div>
+      <div class="field"><label>Rating</label>
+        <select id="vm_rating">${[0,1,2,3,4,5].map(n=>`<option value="${n}" ${n===(v.rating||0)?"selected":""}>${n?"★".repeat(n):"No rating"}</option>`).join("")}</select></div>
+    </div>
+    <div class="field"><label>Notes — what we liked / didn't</label><textarea id="vm_notes" placeholder="Vibe, professionalism, packages, red flags…">${esc(v.notes)}</textarea></div>`,
+    [
+      {label:"Cancel", class:"btn btn-ghost", onClick:closeModal},
+      {label:id?"Save":"Add", onClick:()=>{
+        const obj={id:id||uid(),name:val("vm_name"),contact:val("vm_contact"),price:val("vm_price"),status:val("vm_status"),rating:parseInt(val("vm_rating"))||0,notes:val("vm_notes")};
+        if(!obj.name.trim()){ toast("Please enter a name."); return; }
+        if(id) data[cat].vendors=data[cat].vendors.map(x=>x.id===id?obj:x); else data[cat].vendors.push(obj);
+        save(); renderVendors(cat); renderOverview(); closeModal(); toast("Saved");
+      }}
+    ]);
+}
+document.querySelectorAll("[data-addvendor]").forEach(b=>b.onclick=()=>vendorModal(b.dataset.addvendor,null));
+
+/* preference lists (want / dont) */
+function renderPrefs(cat){
+  ["want","dont"].forEach(type=>{
+    const ul=document.getElementById(cat+cap(type)); const arr=data[cat][type];
+    if(!arr.length){ ul.innerHTML=`<li style="background:transparent;border:none;color:var(--text-faint);font-size:13px;padding:6px 0">Nothing here yet.</li>`; return; }
+    ul.innerHTML=arr.map(p=>`<li><span class="dot"></span><span>${esc(p.text)}</span><span class="x" data-rmpref="${cat}:${type}:${p.id}">&times;</span></li>`).join("");
+    ul.querySelectorAll("[data-rmpref]").forEach(x=>x.onclick=()=>{ const [c,t,id]=x.dataset.rmpref.split(":"); data[c][t]=data[c][t].filter(i=>i.id!==id); save(); renderPrefs(c); });
+  });
+}
+document.querySelectorAll("[data-pref]").forEach(b=>b.onclick=()=>{
+  const [cat,type]=b.dataset.pref.split("-");
+  const inp=document.getElementById(cat+cap(type)+"Input"); const t=inp.value.trim(); if(!t) return;
+  data[cat][type].push({id:uid(),text:t}); inp.value=""; save(); renderPrefs(cat);
+});
+["djWantInput","djDontInput","photoWantInput","photoDontInput"].forEach(idd=>{
+  document.getElementById(idd).addEventListener("keydown",e=>{ if(e.key==="Enter"){ const cat=idd.startsWith("dj")?"dj":"photo"; const type=idd.includes("Want")?"want":"dont"; document.querySelector(`[data-pref="${cat}-${type}"]`).click(); } });
+});
+
+/* ============================================================
+   RENDER: NOTES (with file/photo upload)
+   ============================================================ */
+let pendingFiles = [];
+function renderNotes(){
+  const grid=document.getElementById("notesGrid");
+  document.getElementById("navNotes").textContent=data.notes.length;
+  if(!data.notes.length){ grid.innerHTML=`<div class="empty" style="grid-column:1/-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 3h11l4 4v14H5z"/><path d="M15 3v5h5"/></svg><p>No notes yet. Capture your first idea above.</p></div>`; return; }
+  grid.innerHTML=[...data.notes].reverse().map(n=>`
+    <div class="note-card">
+      <h4>${esc(n.title)}</h4>
+      <div class="note-date">${new Date(n.created).toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})}</div>
+      ${n.description?`<div class="note-desc">${esc(n.description)}</div>`:""}
+      ${n.files&&n.files.length?`<div class="note-files">${n.files.map((f,idx)=>
+        f.type&&f.type.startsWith("image")
+          ? `<img class="note-thumb" src="${f.data}" data-lb="${n.id}:${idx}" alt="${esc(f.name)}">`
+          : `<a class="note-file-chip" href="${f.data}" download="${esc(f.name)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>${esc(f.name.length>14?f.name.slice(0,14)+"…":f.name)}</a>`
+      ).join("")}</div>`:""}
+      <div class="note-actions">
+        <button class="btn btn-ghost btn-sm" data-editnote="${n.id}">Edit</button>
+        <button class="btn btn-danger btn-sm" data-delnote="${n.id}">Delete</button>
+      </div>
+    </div>`).join("");
+  grid.querySelectorAll("[data-lb]").forEach(img=>img.onclick=()=>openLightbox(img.src));
+  grid.querySelectorAll("[data-editnote]").forEach(b=>b.onclick=()=>noteModal(b.dataset.editnote));
+  grid.querySelectorAll("[data-delnote]").forEach(b=>b.onclick=()=>confirmDelete("Delete this note?",()=>{ data.notes=data.notes.filter(x=>x.id!==b.dataset.delnote); save(); renderNotes(); renderOverview(); }));
+}
+function noteModal(id){
+  const n = id ? data.notes.find(x=>x.id===id) : {title:"",description:"",files:[]};
+  pendingFiles = n.files ? structuredClone(n.files) : [];
+  openModal(id?"Edit note":"New note", `
+    <div class="field"><label>Title</label><input id="n_title" value="${esc(n.title)}" placeholder="Note title"></div>
+    <div class="field"><label>Description</label><textarea id="n_desc" placeholder="Write your idea, to-do, or inspiration…">${esc(n.description)}</textarea></div>
+    <div class="field"><label>Attachments</label>
+      <div class="filedrop" id="filedrop">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M5 11l7-7 7 7"/><path d="M4 20h16"/></svg>
+        <p>Click to add photos or files</p>
+        <small>Images are auto-compressed · keep files small</small>
+      </div>
+      <input type="file" id="fileInput" multiple hidden>
+      <div class="pending-files" id="pendingFiles"></div>
+    </div>`,
+    [
+      {label:"Cancel", class:"btn btn-ghost", onClick:closeModal},
+      {label:id?"Save note":"Add note", onClick:()=>{
+        const title=val("n_title").trim(); if(!title){ toast("Give your note a title."); return; }
+        const obj={id:id||uid(),title,description:val("n_desc"),files:pendingFiles,created:n.created||Date.now()};
+        if(id) data.notes=data.notes.map(x=>x.id===id?obj:x); else data.notes.push(obj);
+        save(); renderNotes(); renderOverview(); closeModal(); toast("Note saved");
+      }}
+    ]);
+  document.getElementById("filedrop").onclick=()=>document.getElementById("fileInput").click();
+  document.getElementById("fileInput").onchange=handleFiles;
+  renderPendingFiles();
+}
+function renderPendingFiles(){
+  const el=document.getElementById("pendingFiles"); if(!el) return;
+  el.innerHTML=pendingFiles.map((f,i)=>`
+    <div class="pf">
+      ${f.type&&f.type.startsWith("image")?`<img src="${f.data}" alt="">`:`<div class="pf-doc">${esc(f.name)}</div>`}
+      <button class="rm" data-rmf="${i}">&times;</button>
+    </div>`).join("");
+  el.querySelectorAll("[data-rmf]").forEach(b=>b.onclick=()=>{ pendingFiles.splice(parseInt(b.dataset.rmf),1); renderPendingFiles(); });
+}
+function handleFiles(e){
+  const files=[...e.target.files];
+  files.forEach(file=>{
+    if(file.type.startsWith("image")){
+      compressImage(file, dataUrl=>{ pendingFiles.push({name:file.name,type:file.type,data:dataUrl}); renderPendingFiles(); });
+    } else {
+      if(file.size > 1.5*1024*1024){ toast(`"${file.name}" is large — may not save. Keep files under ~1.5MB.`); }
+      const r=new FileReader();
+      r.onload=()=>{ pendingFiles.push({name:file.name,type:file.type||"file",data:r.result}); renderPendingFiles(); };
+      r.readAsDataURL(file);
+    }
+  });
+  e.target.value="";
+}
+function compressImage(file, cb){
+  const r=new FileReader();
+  r.onload=()=>{
+    const img=new Image();
+    img.onload=()=>{
+      const max=1280; let {width,height}=img;
+      if(width>max||height>max){ const sc=max/Math.max(width,height); width=Math.round(width*sc); height=Math.round(height*sc); }
+      const c=document.createElement("canvas"); c.width=width; c.height=height;
+      c.getContext("2d").drawImage(img,0,0,width,height);
+      cb(c.toDataURL("image/jpeg",0.72));
+    };
+    img.src=r.result;
+  };
+  r.readAsDataURL(file);
+}
+document.getElementById("addNoteBtn").onclick=()=>noteModal(null);
+
+/* ============================================================
+   DELETE CONFIRM
+   ============================================================ */
+function confirmDelete(msg, onYes){
+  openModal("Please confirm", `<p style="color:var(--text-soft);font-size:15px;line-height:1.5">${msg}</p>`,
+    [{label:"Cancel",class:"btn btn-ghost",onClick:closeModal},{label:"Delete",class:"btn",onClick:()=>{onYes();closeModal();}}]);
+}
+
+/* ============================================================
+   BACKUP / RESTORE
+   ============================================================ */
+document.getElementById("exportBtn").onclick=()=>{
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download=`wedding-planner-backup-${new Date().toISOString().slice(0,10)}.json`; a.click();
+  toast("Backup downloaded");
+};
+document.getElementById("importBtn").onclick=()=>document.getElementById("importInput").click();
+document.getElementById("importInput").onchange=e=>{
+  const file=e.target.files[0]; if(!file) return;
+  const r=new FileReader();
+  r.onload=()=>{ try{ const imported=JSON.parse(r.result); data=deepMerge(structuredClone(defaultData),imported); save(); renderAll(); toast("Backup restored"); }catch(err){ toast("Couldn't read that backup file."); } };
+  r.readAsText(file); e.target.value="";
+};
+document.getElementById("syncBtn").onclick = openSyncModal;
+
+/* ============================================================
+   HELPERS + INIT
+   ============================================================ */
+function esc(s){ return (s==null?"":String(s)).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function val(id){ return document.getElementById(id).value; }
+function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+function editIcon(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>'; }
+function trashIcon(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>'; }
+
+function renderAll(){
+  renderVenueDate(); loadVenueFields();
+  renderOverview();
+  renderInvites();
+  renderTrackers();
+  renderParty();
+  renderChecklist("pending","venuePending"); renderChecklist("provide","venueProvide"); renderTimeline();
+  renderVendors("dj"); renderVendors("photo");
+  renderPrefs("dj"); renderPrefs("photo");
+  renderNotes();
+}
+renderAll();
+updateSyncUI();
+if(syncOn()){ cloudPullAndApply(false); }
+setInterval(updateSyncUI, 60000);
+</script>
+</body>
+</html>
